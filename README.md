@@ -1,21 +1,29 @@
 # JavaScript
 
-**TODO: Add description**
+Communicate with JavaScript runtimes.
+
+## Notes
+
+DON'T USE IT.
+
+This package is still in its early stages, so it may still undergo significant changes, potentially leading to breaking changes.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `javascript` to your list of dependencies in `mix.exs`:
+Add `:javascript` to the list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:javascript, "~> 0.1.0"}
+    {:javascript, <requirement>}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/javascript>.
+## Usage
 
+For more information, see the [documentation](https://hexdocs.pm/javascript).
+
+## License
+
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)

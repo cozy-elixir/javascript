@@ -32,6 +32,7 @@ defmodule JavaScript.MixProject do
   defp deps do
     [
       {:nimble_pool, "~> 1.1"},
+      {:jason, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end

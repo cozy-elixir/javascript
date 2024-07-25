@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "main": "default-function-echo.js",
+  "dependencies": {
+    "uuid": "^9.0.1"
+  }
+}

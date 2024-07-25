@@ -41,7 +41,7 @@ async function execEncodedInst(encodedInst) {
     const mod = await importMod(modName)
     const fn = await getFn(mod, fnNames)
     if (!fn) {
-      throw new Error(`Could not find function '${names.join(".")}' in module '${modName}'`)
+      throw new Error(`Could not find function '${fnNames.join(".")}' in module '${modName}'`)
     }
     const returnValue = fn(...args)
     const result = returnValue instanceof Promise ? await returnValue : returnValue

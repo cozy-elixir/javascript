@@ -17,10 +17,10 @@ defmodule JavaScript.Runtime.NodeJS do
   @protocol_prefix "__elixir_javascript_runtime_nodejs__"
 
   # Port can NOT handle more than this
-  @read_chunk_size 65_536
+  @chunk_size 65_536
 
   @doc """
-  Initializes the runtime of Node.js.
+  Initializes the Node.js runtime.
 
   ## Options
 
@@ -44,10 +44,10 @@ defmodule JavaScript.Runtime.NodeJS do
              # TODO: rename it to MODULE_SEARCH_PATHS
              {~c"NODE_PATH", root |> get_module_search_paths() |> String.to_charlist()},
              {~c"PROTOCOL_PREFIX", @protocol_prefix |> String.to_charlist()},
-             {~c"WRITE_CHUNK_SIZE", @read_chunk_size |> to_string() |> String.to_charlist()}
+             {~c"WRITE_CHUNK_SIZE", @chunk_size |> to_string() |> String.to_charlist()}
            ]},
           :binary,
-          {:line, @read_chunk_size},
+          {:line, @chunk_size},
           :hide,
           {:parallelism, true}
         ]
@@ -93,18 +93,20 @@ defmodule JavaScript.Runtime.NodeJS do
 
   defp receive_result(port, data, timeout) do
     receive do
-      {^port, {:data, {:noeol, chunk}}} ->
-        data = data <> chunk
+      {^port, {:data, {:noeol, line}}} ->
+        data = data <> line
         receive_result(port, data, timeout)
 
-      {^port, {:data, {:eol, chunk}}} ->
-        data = data <> chunk
+      {^port, {:data, {:eol, line}}} ->
+        data = data <> line
 
         case data do
           @protocol_prefix <> result ->
             {:ok, result}
 
           _ ->
+            # If the format of the data does not comply with the protocol
+            # requirements, then attempt to retrieve it again.
             receive_result(port, timeout)
         end
     after

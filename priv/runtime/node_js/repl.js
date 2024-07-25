@@ -23,13 +23,19 @@ main()
 async function onInput(encodedInst) {
   const buffer = Buffer.from(`${await execEncodedInst(encodedInst)}\n`)
 
-  // The function we called might have written something to stdout without starting a new line.
-  // So we add one here and write the response after the prefix
+  // The function being called might have written something to STDOUT without
+  // starting a new line. This will interfere the message sent to Elixir.
+  //
+  // To avoid impact it might bring, we:
+  //
+  //   * add a newline here for creating a new message context.
+  //   * write the buffer after a predefined prefix, so the port knows where the
+  //     boundaries of the message body are.
+  //
   process.stdout.write("\n")
   process.stdout.write(PROTOCOL_PREFIX)
   for (let i = 0; i < buffer.length; i += WRITE_CHUNK_SIZE) {
-    let chunk = buffer.slice(i, i + WRITE_CHUNK_SIZE)
-
+    const chunk = buffer.slice(i, i + WRITE_CHUNK_SIZE)
     process.stdout.write(chunk)
   }
 }

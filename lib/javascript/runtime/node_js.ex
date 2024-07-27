@@ -10,15 +10,6 @@ defmodule JavaScript.Runtime.NodeJS do
 
   @behaviour JavaScript.Runtime
 
-  # The protocol refers to the format in which information is transmitted
-  # between Elixir and Node.js.
-  # In order to make sure that no one can interfere with the protocol between
-  # them, every lines written by Node.js are prefixed by following string.
-  @protocol_prefix "__elixir_javascript_runtime_nodejs__"
-
-  # Port can NOT handle more than this
-  @chunk_size 65_536
-
   @doc """
   Initializes the Node.js runtime.
 
@@ -41,13 +32,13 @@ defmodule JavaScript.Runtime.NodeJS do
           {:args, [repl_js]},
           {:env,
            [
-             # TODO: rename it to MODULE_SEARCH_PATHS
-             {~c"NODE_PATH", root |> get_module_search_paths() |> String.to_charlist()},
-             {~c"PROTOCOL_PREFIX", @protocol_prefix |> String.to_charlist()},
-             {~c"WRITE_CHUNK_SIZE", @chunk_size |> to_string() |> String.to_charlist()}
+             {~c"NODE_PATH", root |> get_module_search_paths() |> String.to_charlist()}
            ]},
+          # options which are necessary
           :binary,
-          {:line, @chunk_size},
+          {:packet, 4},
+          :use_stdio,
+          # options which are better to have
           :hide,
           {:parallelism, true}
         ]
@@ -71,53 +62,32 @@ defmodule JavaScript.Runtime.NodeJS do
   def call(port, ma_mfa, opts \\ [])
 
   def call(port, {mod, args}, opts) do
-    call(port, {mod, nil, args}, opts)
+    call(port, {mod, [], args}, opts)
   end
 
   def call(port, {_mod, _fun, _args} = instruction, opts) do
+    {timeout, opts} = Keyword.pop(opts, :timeout, 5000)
     send(port, {self(), {:command, encode_instruction!(instruction, opts)}})
 
-    with {:ok, result} <- receive_result(port, 5000) do
-      decode_result!(result)
-    end
-  end
-
-  defp encode_instruction!({mod, fun, args}, opts) do
-    Jason.encode!([
-      Tuple.to_list({mod, List.wrap(fun), args}),
-      Map.new(opts)
-    ]) <> "\n"
-  end
-
-  defp receive_result(port, timeout), do: receive_result(port, "", timeout)
-
-  defp receive_result(port, data, timeout) do
     receive do
-      {^port, {:data, {:noeol, line}}} ->
-        data = data <> line
-        receive_result(port, data, timeout)
-
-      {^port, {:data, {:eol, line}}} ->
-        data = data <> line
-
-        case data do
-          @protocol_prefix <> result ->
-            {:ok, result}
-
-          _ ->
-            # If the format of the data does not comply with the protocol
-            # requirements, then attempt to retrieve it again.
-            receive_result(port, timeout)
-        end
+      {^port, {:data, result}} ->
+        decode_result!(result)
     after
       timeout ->
         {:error, :timeout}
     end
   end
 
+  defp encode_instruction!({mod, fun, args}, opts) do
+    :erlang.term_to_binary([
+      {mod, List.wrap(fun), args},
+      Map.new(opts)
+    ])
+  end
+
   defp decode_result!(result) do
     result
-    |> Jason.decode!()
+    |> :erlang.binary_to_term()
     |> case do
       ["ok", value] ->
         {:ok, value}

@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "watch": "node build.js --watch",
+    "build": "node build.js --deploy"
+  },
+  "devDependencies": {
+    "esbuild": "^0.23.0"
+  },
+  "dependencies": {
+    "wetf": "^0.9.14"
+  }
+}

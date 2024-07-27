@@ -37,7 +37,7 @@ defmodule JavaScript.Runtime.NodeJS do
           # options which are necessary
           :binary,
           {:packet, 4},
-          :use_stdio,
+          :nouse_stdio,
           # options which are better to have
           :hide,
           {:parallelism, true}

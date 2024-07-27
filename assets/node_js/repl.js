@@ -1,10 +1,11 @@
+import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import path from "node:path"
 import readline from "node:readline"
 import ETF from "./etf"
 
-const fdIn = process.stdin
-const fdOut = process.stdout
+const fdIn = fsSync.createReadStream(null, { fd: 3 })
+const fdOut = fsSync.createWriteStream(null, { fd: 4 })
 
 function main() {
   fdIn.on("end", () => process.exit())

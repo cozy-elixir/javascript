@@ -22,6 +22,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 
 // node_js/repl.js
+var import_node_fs = __toESM(require("fs"), 1);
 var import_promises = __toESM(require("fs/promises"), 1);
 var import_node_path = __toESM(require("path"), 1);
 
@@ -1096,8 +1097,8 @@ var etf_default = {
 };
 
 // node_js/repl.js
-var fdIn = process.stdin;
-var fdOut = process.stdout;
+var fdIn = import_node_fs.default.createReadStream(null, { fd: 3 });
+var fdOut = import_node_fs.default.createWriteStream(null, { fd: 4 });
 function main() {
   fdIn.on("end", () => process.exit());
   fdIn.on("readable", read);

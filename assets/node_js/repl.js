@@ -18,8 +18,8 @@ async function read() {
   let packetBody
 
   while ((packetBody = readPacket()) !== null) {
-    const encodedCall = packetBody
-    const buffer = await execCall(encodedCall)
+    const encodedInst = packetBody
+    const buffer = await execCall(encodedInst)
     writePacket(buffer)
   }
 }
@@ -43,9 +43,9 @@ function writePacket(buffer) {
   fdOut.write(packetBody)
 }
 
-async function execCall(encodedCall) {
+async function execCall(encodedInst) {
   try {
-    const [[modName, fnNames, args], opts] = ETF.unpack(encodedCall)
+    const [[modName, fnNames, args], opts] = ETF.unpack(encodedInst)
 
     const importMod = opts.esm ? importModuleRespectingNodePath : requireModule
     const mod = await importMod(modName)

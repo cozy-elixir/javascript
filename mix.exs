@@ -55,7 +55,13 @@ defmodule JavaScript.MixProject do
   end
 
   defp aliases do
-    [publish: ["hex.publish", "tag"], tag: &tag_release/1]
+    [
+      setup: ["deps.get", "cmd --cd assets npm install"],
+      "assets.build": "cmd --cd assets npm run build",
+      "assets.watch": "cmd --cd assets npm run watch",
+      publish: ["hex.publish", "tag"],
+      tag: &tag_release/1
+    ]
   end
 
   defp tag_release(_) do

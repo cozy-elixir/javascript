@@ -65,9 +65,9 @@ defmodule JavaScript.Runtime.NodeJS do
     call(port, {mod, [], args}, opts)
   end
 
-  def call(port, {_mod, _fun, _args} = instruction, opts) do
+  def call(port, {_mod, _fun, _args} = inst, opts) do
     {timeout, opts} = Keyword.pop(opts, :timeout, 5000)
-    send(port, {self(), {:command, encode_instruction!(instruction, opts)}})
+    send(port, {self(), {:command, encode_inst!(inst, opts)}})
 
     receive do
       {^port, {:data, result}} ->
@@ -78,7 +78,7 @@ defmodule JavaScript.Runtime.NodeJS do
     end
   end
 
-  defp encode_instruction!({mod, fun, args}, opts) do
+  defp encode_inst!({mod, fun, args}, opts) do
     :erlang.term_to_binary([
       {mod, List.wrap(fun), args},
       Map.new(opts)
